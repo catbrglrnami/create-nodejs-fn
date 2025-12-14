@@ -7,7 +7,7 @@ import fs from "node:fs";
 import { VariableDeclarationKind } from "ts-morph";
 
 function collectExternalDeps(rootPkgPath: string, needed: string[]) {
-  let pkgJson: any = { name: "capnweb-container", version: "0.0.0" };
+  let pkgJson: any = { name: "create-nodejs-fn-container", version: "0.0.0" };
   if (fs.existsSync(rootPkgPath)) {
     try {
       pkgJson = JSON.parse(fs.readFileSync(rootPkgPath, "utf8"));
@@ -31,7 +31,11 @@ function collectExternalDeps(rootPkgPath: string, needed: string[]) {
       }
     }
   }
-  return { name: pkgJson.name ?? "capnweb-container", version: pkgJson.version ?? "0.0.0", dependencies: out };
+  return {
+    name: pkgJson.name ?? "create-nodejs-fn-container",
+    version: pkgJson.version ?? "0.0.0",
+    dependencies: out,
+  };
 }
 
 export type BuildContainerServerOptions = {
@@ -112,7 +116,7 @@ http.createServer((req, res) => {
   });
 
   sf.addStatements(
-    `server.listen(${containerPort}, "0.0.0.0", () => console.log("capnweb container listening on ${containerPort}"));`,
+    `server.listen(${containerPort}, "0.0.0.0", () => console.log("create-nodejs-fn container listening on ${containerPort}"));`,
   );
 
   writeFileIfChanged(entryTs, printSource(sf));

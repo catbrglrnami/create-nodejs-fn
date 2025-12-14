@@ -16,11 +16,11 @@ import { makeProject } from "./project-utils";
 import { proxyFilePath, sanitizeNamespace } from "./path-utils";
 import type { DiscoveredModule, Opts, RegenKind } from "./types";
 
-export function capnwebContainers(opts: Opts = {}): Plugin {
+export function createNodejsFn(opts: Opts = {}): Plugin {
   const files = opts.files ?? ["src/**/*.container.ts"];
   const generatedDir = opts.generatedDir ?? "src/__generated__";
-  const binding = opts.binding ?? "CAPNWEB_CONTAINER";
-  const className = opts.className ?? "CapnwebContainer";
+  const binding = opts.binding ?? "NODEJS_FN";
+  const className = opts.className ?? "NodejsFnContainer";
   const containerPort = opts.containerPort ?? 8080;
   const external = opts.external ?? [];
   const docker = opts.docker ?? {};
@@ -179,9 +179,9 @@ export function capnwebContainers(opts: Opts = {}): Plugin {
   ) {
     regenQueue = regenQueue
       .then(() => regenerate(kind, delta))
-      .catch((err) => {
-        console.error("[capnweb] regeneration failed", err);
-      });
+        .catch((err) => {
+          console.error("[create-nodejs-fn] regeneration failed", err);
+        });
     return regenQueue;
   }
 
@@ -201,12 +201,12 @@ export function capnwebContainers(opts: Opts = {}): Plugin {
           restartingDevServer = true;
           try {
             serverForRestart?.config.logger?.info?.(
-              `[capnweb] Restarting Vite dev server to rebuild containers (${reason})`
+              `[create-nodejs-fn] Restarting Vite dev server to rebuild containers (${reason})`
             );
             await serverForRestart?.restart();
           } catch (err) {
             console.error(
-              "[capnweb] failed to restart dev server for container rebuild",
+              "[create-nodejs-fn] failed to restart dev server for container rebuild",
               err
             );
           } finally {
@@ -214,13 +214,13 @@ export function capnwebContainers(opts: Opts = {}): Plugin {
           }
         })
         .catch((err) => {
-          console.error("[capnweb] regeneration failed before restart", err);
+          console.error("[create-nodejs-fn] regeneration failed before restart", err);
         });
     }, 150);
   }
 
   return {
-    name: "vite-plugin-cf-capnweb-containers",
+    name: "vite-plugin-create-nodejs-fn",
     enforce: "pre",
 
     config(userConfig) {

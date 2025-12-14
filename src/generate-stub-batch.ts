@@ -3,7 +3,7 @@ import { writeFileIfChanged } from "./fs-utils";
 
 export function generateStubBatch(gdirAbs: string, generatedStubBatchFileName: string) {
   const filePath = path.join(gdirAbs, generatedStubBatchFileName);
-  const content = `// Derived from Cloudflare's capnweb helper implementation.
+  const content = `// Derived from Cloudflare's create-nodejs-fn helper implementation.
 // Modifications: Use Durable Object stub.fetch() instead of global fetch().
 //
 // Copyright (c) 2025 Cloudflare, Inc.
@@ -66,7 +66,7 @@ export function newHttpBatchRpcSession<T extends Rpc.Stubable>(
   path: string = "/api",
 ): RpcStub<T> {
   const sendBatch: SendBatchFunc = async (batch: string[]) => {
-    const req = new Request(\`http://capnweb\${path}\`, {
+    const req = new Request(\`http://create-nodejs-fn\${path}\`, {
       method: "POST",
       body: batch.join("\\n"),
       headers: { "content-type": "text/plain; charset=utf-8" },

@@ -31,7 +31,7 @@ export function generateProxyFiles(opts: ProxyFileGenOptions) {
     });
     sf.addImportDeclaration({
       moduleSpecifier: `${genBase}/${generatedContextFileName.replace(/\.ts$/, "")}`,
-      namedImports: ["__getCapnwebStore", "__resolveContainerKey"],
+      namedImports: ["__getNodejsFnStore", "__resolveContainerKey"],
     });
 
     sf.addTypeAlias({
@@ -62,8 +62,8 @@ export function generateProxyFiles(opts: ProxyFileGenOptions) {
             type: tName,
             initializer: `
 ((...args: any[]) => {
-  const s = __getCapnwebStore();
-  if (!s) throw new Error("capnweb: missing context. Wrap fetch with withCapnweb().");
+  const s = __getNodejsFnStore();
+  if (!s) throw new Error("create-nodejs-fn: missing context. Wrap fetch with withNodejsFn().");
 
   const ctx = { request: s.request, env: s.env, args };
   const localKey = (${keyExpr}) as __Key;
