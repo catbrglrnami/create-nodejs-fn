@@ -25,7 +25,7 @@ export function generateRuntime(gdirAbs: string, runtimeFileName: string) {
 
   sf.addFunction({
     isExported: true,
-    name: "containerFn",
+    name: "nodejsFn",
     typeParameters: [{ name: "T", constraint: "(...args: any[]) => any" }],
     parameters: [
       { name: "fn", type: "T" },

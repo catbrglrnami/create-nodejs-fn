@@ -93,7 +93,7 @@ export function extractExports(sf: SourceFile): DiscoveredExport[] {
       const name = decl.getName();
       if (!init || !Node.isCallExpression(init)) continue;
       const callee = init.getExpression();
-      if (!Node.isIdentifier(callee) || callee.getText() !== "containerFn") continue;
+      if (!Node.isIdentifier(callee) || callee.getText() !== "nodejsFn") continue;
 
       const args = init.getArguments();
       const optArg = args[1] as Expression | undefined;

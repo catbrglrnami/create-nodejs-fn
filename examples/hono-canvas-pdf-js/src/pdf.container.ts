@@ -1,8 +1,8 @@
-import { containerFn } from "./__generated__/create-nodejs-fn.runtime";
-import { CanvasRenderingContext2D, createCanvas } from "@napi-rs/canvas";
+import { type CanvasRenderingContext2D, createCanvas } from "@napi-rs/canvas";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+import { nodejsFn } from "./__generated__/create-nodejs-fn.runtime";
 
-export const renderPdfPage = containerFn(async (url: string, pageNum: number, scale: number) => {
+export const renderPdfPage = nodejsFn(async (url: string, pageNum: number, scale: number) => {
   const loadingTask = pdfjsLib.getDocument({ url });
   const pdfDoc = await loadingTask.promise;
 
@@ -15,7 +15,7 @@ export const renderPdfPage = containerFn(async (url: string, pageNum: number, sc
   const renderTask = page.render({ canvasContext: ctx, viewport } as any);
   await renderTask.promise;
 
-  const dataUrlWebp = await canvas.toDataURLAsync("image/webp", 82);
+  const dataUrlWebp = await canvas.toDataURLAsync("image/webp", 80);
 
   return dataUrlWebp;
 });
