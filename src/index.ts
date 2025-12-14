@@ -26,6 +26,7 @@ export function createNodejsFnPlugin(opts: Opts = {}): Plugin {
   const docker = opts.docker ?? {};
   const workerEnvVars = opts.workerEnvVars ?? [];
   const autoRebuildContainers = opts.autoRebuildContainers ?? true;
+  const rebuildDebounceMs = opts.rebuildDebounceMs ?? 600;
 
   let root = process.cwd();
   let outDir = "dist";
@@ -33,6 +34,11 @@ export function createNodejsFnPlugin(opts: Opts = {}): Plugin {
   let devServer: ViteDevServer | null = null;
   let restartTimer: ReturnType<typeof setTimeout> | null = null;
   let restartingDevServer = false;
+  let serveDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+  const pendingChanged = new Set<string>();
+  const pendingRemoved = new Set<string>();
+  let pendingForce = false;
+  let pendingReason: string | null = null;
 
   const project = makeProject();
   const moduleCache = new Map<string, DiscoveredModule>(); // abs path -> module info
@@ -213,7 +219,33 @@ export function createNodejsFnPlugin(opts: Opts = {}): Plugin {
         .catch((err) => {
           console.error("[create-nodejs-fn] regeneration failed before restart", err);
         });
-    }, 150);
+    }, rebuildDebounceMs);
+  }
+
+  function scheduleServeRegeneration(
+    reason: string,
+    delta: { changed?: string[]; removed?: string[]; force?: boolean },
+  ) {
+    delta.changed?.forEach((p) => pendingChanged.add(path.normalize(p)));
+    delta.removed?.forEach((p) => pendingRemoved.add(path.normalize(p)));
+    if (delta.force) pendingForce = true;
+    pendingReason = reason;
+
+    if (serveDebounceTimer) clearTimeout(serveDebounceTimer);
+    serveDebounceTimer = setTimeout(() => {
+      serveDebounceTimer = null;
+      const changed = pendingChanged.size ? Array.from(pendingChanged) : undefined;
+      const removed = pendingRemoved.size ? Array.from(pendingRemoved) : undefined;
+      const force = pendingForce;
+      pendingChanged.clear();
+      pendingRemoved.clear();
+      pendingForce = false;
+
+      enqueueRegeneration("serve", { changed, removed, force });
+      const reasonText = pendingReason ?? "changes";
+      pendingReason = null;
+      scheduleContainerRebuild(reasonText);
+    }, rebuildDebounceMs);
   }
 
   return {
@@ -270,13 +302,11 @@ export function createNodejsFnPlugin(opts: Opts = {}): Plugin {
       const onAddOrChange = (p: string) => {
         if (!p.endsWith(".container.ts")) return;
         containerFiles.add(path.normalize(p));
-        enqueueRegeneration("serve", { changed: [p] });
-        scheduleContainerRebuild(`changed ${path.relative(root, p)}`);
+        scheduleServeRegeneration(`changed ${path.relative(root, p)}`, { changed: [p] });
       };
       const onUnlink = (p: string) => {
         if (!p.endsWith(".container.ts")) return;
-        enqueueRegeneration("serve", { removed: [p] });
-        scheduleContainerRebuild(`removed ${path.relative(root, p)}`);
+        scheduleServeRegeneration(`removed ${path.relative(root, p)}`, { removed: [p] });
       };
 
       server.watcher.on("add", onAddOrChange);

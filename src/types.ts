@@ -25,6 +25,10 @@ export type Opts = {
    * Automatically rebuild containers in local dev when *.container.ts files change. default: true
    */
   autoRebuildContainers?: boolean;
+  /**
+   * Debounce duration in milliseconds for container rebuilds during dev. default: 200
+   */
+  rebuildDebounceMs?: number;
 };
 
 export type DiscoveredExport = { name: string; containerKeyExpr?: string };

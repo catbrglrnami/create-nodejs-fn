@@ -12,15 +12,19 @@ export const renderPdfPage = nodejsFn(
     const viewport = page.getViewport({ scale });
 
     const canvas = createCanvas(viewport.width, viewport.height);
+
     const ctx = canvas.getContext("2d") as unknown as CanvasRenderingContext2D;
+
     const renderTask = page.render({ canvasContext: ctx, viewport } as any);
+
     await renderTask.promise;
 
     const dataUrlWebp = await canvas.toDataURLAsync("image/webp", 80);
 
     return dataUrlWebp;
   },
-  containerKey((ctx) => {
+
+  containerKey(({ args: _ }) => {
     const random = Math.floor(Math.random() * 3);
     const key = `instance-${random}`;
     console.log("accesss to ", key);
