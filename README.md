@@ -16,41 +16,8 @@ Want to use `@napi-rs/canvas`, `sharp`, or `pdfjs-dist`? Too bad...?
 
 `create-nodejs-fn` uses the following dark arts to make the impossible possible:
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        🌐 Cloudflare Workers                                │
-│                                                                             │
-│   import { renderClock } from "./clock.container";                          │
-│                          ↓                                                  │
-│   // 😱 Looks like a normal function call, right?                           │
-│   const image = await renderClock();                                        │
-│   // But actually...                                                        │
-│                          ↓                                                  │
-│   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │  🧙 Auto-generated proxy (ts-morph AST magic)                       │   │
-│   │  → Transforms to RPC client while preserving type info              │   │
-│   └─────────────────────────────────────────────────────────────────────┘   │
-│                          ↓                                                  │
-│   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │  📦 capnweb RPC (Cap'n Proto based. Fast. Really fast.)            │   │
-│   └─────────────────────────────────────────────────────────────────────┘   │
-│                          ↓                                                  │
-└─────────────────────────────────────────────────────────────────────────────┘
-                           ↓ HTTP over Cloudflare Containers
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                     🐳 Docker Container (Node.js)                           │
-│                                                                             │
-│   import { createCanvas } from "@napi-rs/canvas";                           │
-│                                                                             │
-│   // 🎨 Native modules running wild!!                                       │
-│   const canvas = createCanvas(400, 200);                                    │
-│   const ctx = canvas.getContext("2d");                                      │
-│   ctx.font = "48px 'Noto Sans JP'";                                         │
-│   ctx.fillText(new Date().toISOString(), 10, 100);                          │
-│   return canvas.toDataURLAsync("image/png");                                │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+![alt](./assets/black-magic.jpg)
+
 
 ## 🪄 The Black Magic Revealed
 
@@ -291,18 +258,6 @@ project/
 
 ---
 
-## 🔮 Black Magic Catalog
-
-| Magic | Description |
-|-------|-------------|
-| **ts-morph** | Parses TypeScript AST for code generation. Preserves full type information. |
-| **esbuild** | Blazing fast bundler. Generates container code in an instant. |
-| **capnweb** | Cap'n Proto-based RPC. Zero-copy serialization = fast. |
-| **Cloudflare Containers** | Operate Docker containers from Workers. Paired with Durable Objects. |
-| **Vite Plugin API** | Hijacks imports via `resolveId` hook and swaps them with proxies. |
-
----
-
 ## ⚠️ Limitations & Caveats
 
 - **Not for production**: This is an experimental project
@@ -316,19 +271,3 @@ project/
 ## 📝 License
 
 MIT
-
----
-
-## 🙏 Acknowledgments
-
-- [Cloudflare Workers](https://workers.cloudflare.com/) - The future of edge computing
-- [Cloudflare Containers](https://developers.cloudflare.com/containers/) - The tech that made this madness possible
-- [@napi-rs/canvas](https://github.com/Brooooooklyn/canvas) - Canvas in Node.js, what a time to be alive
-- [ts-morph](https://github.com/dsherret/ts-morph) - The godly TypeScript AST manipulation library
-- [capnweb](https://github.com/nicoco007/capnweb) - Lightning-fast RPC
-
----
-
-<p align="center">
-  <strong>🧙‍♂️ Use at your own risk. Welcome to the world of insane black magic. 🧙‍♂️</strong>
-</p>
