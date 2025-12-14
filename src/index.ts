@@ -1,19 +1,19 @@
 import fs from "node:fs";
 import path from "node:path";
 import { globSync } from "glob";
-import type { Plugin, ResolvedConfig, ViteDevServer } from "vite";
 import type { SourceFile } from "ts-morph";
+import type { Plugin, ResolvedConfig, ViteDevServer } from "vite";
 
 import { buildContainerServer } from "./build-container-server";
 import { ARTIFACTS_DIR_NAME, GENERATED_FILENAMES } from "./constants";
 import { extractExports } from "./extractors";
+import { ensureDir } from "./fs-utils";
 import { generateProxyFiles } from "./generate-proxy-files";
 import { generateRuntime } from "./generate-runtime";
 import { generateStubBatch } from "./generate-stub-batch";
 import { generateWorkerFiles } from "./generate-worker-files";
-import { ensureDir } from "./fs-utils";
-import { makeProject } from "./project-utils";
 import { proxyFilePath, sanitizeNamespace } from "./path-utils";
+import { makeProject } from "./project-utils";
 import type { DiscoveredModule, Opts, RegenKind } from "./types";
 
 export function createNodejsFnPlugin(opts: Opts = {}): Plugin {
@@ -42,10 +42,10 @@ export function createNodejsFnPlugin(opts: Opts = {}): Plugin {
 
   function discoverFileList() {
     const patterns = files;
-    const absFiles = patterns.flatMap((p) =>
-      globSync(p, { cwd: root, absolute: true })
-    );
-    absFiles.forEach((f) => containerFiles.add(path.normalize(f)));
+    const absFiles = patterns.flatMap((p) => globSync(p, { cwd: root, absolute: true }));
+    absFiles.forEach((f) => {
+      containerFiles.add(path.normalize(f));
+    });
     return absFiles;
   }
 
@@ -106,18 +106,15 @@ export function createNodejsFnPlugin(opts: Opts = {}): Plugin {
 
   async function regenerate(
     kind: RegenKind,
-    delta?: { changed?: string[]; removed?: string[]; force?: boolean }
+    delta?: { changed?: string[]; removed?: string[]; force?: boolean },
   ) {
     if (!generatedOnce) {
       discoverFileList();
     }
 
-    const dirty =
-      refreshModules(delta?.changed, delta?.removed) ||
-      delta?.force ||
-      !generatedOnce;
+    const dirty = refreshModules(delta?.changed, delta?.removed) || delta?.force || !generatedOnce;
     const mods = Array.from(moduleCache.values()).sort((a, b) =>
-      a.namespace.localeCompare(b.namespace)
+      a.namespace.localeCompare(b.namespace),
     );
 
     if (!dirty && generatedOnce) {
@@ -175,13 +172,13 @@ export function createNodejsFnPlugin(opts: Opts = {}): Plugin {
 
   function enqueueRegeneration(
     kind: RegenKind,
-    delta?: { changed?: string[]; removed?: string[]; force?: boolean }
+    delta?: { changed?: string[]; removed?: string[]; force?: boolean },
   ) {
     regenQueue = regenQueue
       .then(() => regenerate(kind, delta))
-        .catch((err) => {
-          console.error("[create-nodejs-fn] regeneration failed", err);
-        });
+      .catch((err) => {
+        console.error("[create-nodejs-fn] regeneration failed", err);
+      });
     return regenQueue;
   }
 
@@ -201,13 +198,13 @@ export function createNodejsFnPlugin(opts: Opts = {}): Plugin {
           restartingDevServer = true;
           try {
             serverForRestart?.config.logger?.info?.(
-              `[create-nodejs-fn] Restarting Vite dev server to rebuild containers (${reason})`
+              `[create-nodejs-fn] Restarting Vite dev server to rebuild containers (${reason})`,
             );
             await serverForRestart?.restart();
           } catch (err) {
             console.error(
               "[create-nodejs-fn] failed to restart dev server for container rebuild",
-              err
+              err,
             );
           } finally {
             restartingDevServer = false;
@@ -256,13 +253,10 @@ export function createNodejsFnPlugin(opts: Opts = {}): Plugin {
       const proxyPath = proxyFilePath(gdirAbs, resolved);
 
       if (!fs.existsSync(proxyPath)) {
-        await enqueueRegeneration(
-          config?.command === "build" ? "build" : "serve",
-          {
-            changed: [resolved],
-            force: true,
-          }
-        );
+        await enqueueRegeneration(config?.command === "build" ? "build" : "serve", {
+          changed: [resolved],
+          force: true,
+        });
       }
 
       return proxyPath;

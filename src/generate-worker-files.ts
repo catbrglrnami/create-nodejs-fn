@@ -97,7 +97,7 @@ export function generateWorkerFiles(opts: WorkerFileGenOptions) {
             parameters: [{ name: "args", isRestParameter: true, type: `Parameters<${alias}>` }],
             returnType: `ReturnType<${alias}>`,
           };
-        })
+        }),
       ),
     });
 
@@ -148,7 +148,10 @@ return { ${objLines.join(" ")} } as any;
   {
     const sf = genProject.createSourceFile(doPath, "", { overwrite: true });
     sf.addStatements(["// AUTO-GENERATED. DO NOT EDIT."]);
-    sf.addImportDeclaration({ moduleSpecifier: "@cloudflare/containers", namedImports: ["Container"] });
+    sf.addImportDeclaration({
+      moduleSpecifier: "@cloudflare/containers",
+      namedImports: ["Container"],
+    });
 
     const envVarEntries = Array.isArray(workerEnvVars)
       ? workerEnvVars.map((n) => [n, n] as [string, string])
@@ -181,10 +184,13 @@ return { ${objLines.join(" ")} } as any;
     const sf = genProject.createSourceFile(ctxPath, "", { overwrite: true });
     sf.addStatements([
       "// AUTO-GENERATED. DO NOT EDIT.",
-      "// Requires Workers compatibility_flags: [\"nodejs_als\"] or [\"nodejs_compat\"]",
+      '// Requires Workers compatibility_flags: ["nodejs_als"] or ["nodejs_compat"]',
     ]);
 
-    sf.addImportDeclaration({ moduleSpecifier: "node:async_hooks", namedImports: ["AsyncLocalStorage"] });
+    sf.addImportDeclaration({
+      moduleSpecifier: "node:async_hooks",
+      namedImports: ["AsyncLocalStorage"],
+    });
 
     sf.addTypeAlias({
       name: "ContainerKey",

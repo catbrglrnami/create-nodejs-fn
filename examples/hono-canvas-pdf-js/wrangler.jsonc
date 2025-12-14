@@ -2,5 +2,27 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "example",
   "compatibility_date": "2025-08-03",
-  "main": "./src/index.tsx"
+  "main": "./src/index.ts",
+  "compatibility_flags": ["nodejs_compat"],
+  "containers": [
+    {
+      "class_name": "NodejsFnContainer",
+      "image": "./.create-nodejs-fn/Dockerfile",
+      "max_instances": 10
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "NODEJS_FN",
+        "class_name": "NodejsFnContainer"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["NodejsFnContainer"]
+    }
+  ]
 }

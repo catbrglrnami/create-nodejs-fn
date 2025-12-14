@@ -1,9 +1,9 @@
 import path from "node:path";
-import { makeProject, printSource } from "./project-utils";
+import { VariableDeclarationKind } from "ts-morph";
 import { writeFileIfChanged } from "./fs-utils";
 import { proxyFilePath } from "./path-utils";
+import { makeProject, printSource } from "./project-utils";
 import type { DiscoveredModule } from "./types";
-import { VariableDeclarationKind } from "ts-morph";
 
 export type ProxyFileGenOptions = {
   gdirAbs: string;
@@ -68,8 +68,8 @@ export function generateProxyFiles(opts: ProxyFileGenOptions) {
   const ctx = { request: s.request, env: s.env, args };
   const localKey = (${keyExpr}) as __Key;
   const keyP = __resolveContainerKey(${JSON.stringify(mod.namespace)}, ${JSON.stringify(
-              ex.name,
-            )}, ctx, localKey ?? (s.containerKey as __Key));
+    ex.name,
+  )}, ctx, localKey ?? (s.containerKey as __Key));
 
   return Promise.resolve(keyP).then((key) =>
     (containers({ env: s.env, containerKey: key }) as any).${mod.namespace}.${ex.name}(...args),

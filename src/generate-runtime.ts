@@ -1,6 +1,6 @@
 import path from "node:path";
-import { makeProject, printSource } from "./project-utils";
 import { writeFileIfChanged } from "./fs-utils";
+import { makeProject, printSource } from "./project-utils";
 
 export function generateRuntime(gdirAbs: string, runtimeFileName: string) {
   const genProject = makeProject();

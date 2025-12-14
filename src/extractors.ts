@@ -1,16 +1,14 @@
-import {
-  Node,
-  type MethodDeclaration,
-  type Expression,
-  type SourceFile,
-} from "ts-morph";
+import { type Expression, type MethodDeclaration, Node, type SourceFile } from "ts-morph";
 import type { DiscoveredExport } from "./types";
 
 function methodToFunctionExprText(m: MethodDeclaration): string | undefined {
   const body = m.getBody();
   if (!body) return undefined;
   const asyncPrefix = m.isAsync() ? "async " : "";
-  const params = m.getParameters().map((p) => p.getText()).join(", ");
+  const params = m
+    .getParameters()
+    .map((p) => p.getText())
+    .join(", ");
   return `${asyncPrefix}(${params}) => ${body.getText()}`;
 }
 
@@ -107,7 +105,9 @@ export function extractExports(sf: SourceFile): DiscoveredExport[] {
 
   for (const fn of sf.getFunctions()) {
     if (!fn.isExported()) continue;
-    const hasTag = fn.getJsDocs().some((d) => d.getTags().some((t) => t.getTagName() === "container"));
+    const hasTag = fn
+      .getJsDocs()
+      .some((d) => d.getTags().some((t) => t.getTagName() === "container"));
     if (hasTag) {
       const name = fn.getName();
       if (name) out.push({ name });

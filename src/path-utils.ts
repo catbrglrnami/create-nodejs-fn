@@ -1,5 +1,5 @@
-import path from "node:path";
 import crypto from "node:crypto";
+import path from "node:path";
 import { ensureDir } from "./fs-utils";
 
 export function hash8(s: string) {
@@ -7,9 +7,9 @@ export function hash8(s: string) {
 }
 
 export function sanitizeNamespace(relNoExt: string) {
-  const noSrc = relNoExt.replace(/^src[\/\\]/, "");
+  const noSrc = relNoExt.replace(/^src[/\\]/, "");
   const noSuffix = noSrc.replace(/\.container$/, "");
-  return noSuffix.replace(/[\/\\]/g, "_").replace(/[^A-Za-z0-9_]/g, "_");
+  return noSuffix.replace(/[/\\]/g, "_").replace(/[^A-Za-z0-9_]/g, "_");
 }
 
 export function proxyFilePath(gdirAbs: string, containerAbs: string) {

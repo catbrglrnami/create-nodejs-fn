@@ -1,10 +1,10 @@
+import fs from "node:fs";
 import path from "node:path";
 import * as esbuild from "esbuild";
-import { ensureDir, writeFileIfChanged } from "./fs-utils";
-import { detectPkgManager, makeProject, printSource } from "./project-utils";
-import type { DiscoveredModule, DockerOptions } from "./types";
-import fs from "node:fs";
 import { VariableDeclarationKind } from "ts-morph";
+import { ensureDir, writeFileIfChanged } from "./fs-utils";
+import { makeProject, printSource } from "./project-utils";
+import type { DiscoveredModule, DockerOptions } from "./types";
 
 function collectExternalDeps(rootPkgPath: string, needed: string[]) {
   let pkgJson: any = { name: "create-nodejs-fn-container", version: "0.0.0" };
@@ -59,14 +59,20 @@ export async function buildContainerServer(opts: BuildContainerServerOptions) {
   const sf = genProject.createSourceFile(entryTs, "", { overwrite: true });
   sf.addStatements(["// AUTO-GENERATED. DO NOT EDIT."]);
   sf.addImportDeclaration({ defaultImport: "http", moduleSpecifier: "node:http" });
-  sf.addImportDeclaration({ moduleSpecifier: "capnweb", namedImports: ["RpcTarget", "nodeHttpBatchRpcResponse"] });
+  sf.addImportDeclaration({
+    moduleSpecifier: "capnweb",
+    namedImports: ["RpcTarget", "nodeHttpBatchRpcResponse"],
+  });
 
   for (const mod of mods) {
     const relFromEntry = path
       .relative(path.dirname(entryTs), path.join(root, mod.fileRelFromRoot))
       .replace(/\\/g, "/")
       .replace(/\.tsx?$/, "");
-    sf.addImportDeclaration({ namespaceImport: `m_${mod.namespace}`, moduleSpecifier: relFromEntry });
+    sf.addImportDeclaration({
+      namespaceImport: `m_${mod.namespace}`,
+      moduleSpecifier: relFromEntry,
+    });
   }
 
   sf.addClass({
@@ -123,7 +129,10 @@ http.createServer((req, res) => {
 
   const pkgJson = collectExternalDeps(path.join(root, "package.json"), external);
   if (pkgJson) {
-    writeFileIfChanged(path.join(outBaseAbs, "package.json"), JSON.stringify(pkgJson, null, 2) + "\n");
+    writeFileIfChanged(
+      path.join(outBaseAbs, "package.json"),
+      `${JSON.stringify(pkgJson, null, 2)}\n`,
+    );
   }
 
   const {
@@ -134,14 +143,7 @@ http.createServer((req, res) => {
     env: dockerEnv = {},
   } = dockerOpts ?? {};
 
-  const pm = detectPkgManager(root);
-
-  const installLines =
-    pm === "pnpm"
-      ? `RUN corepack enable && pnpm install --prod --no-frozen-lockfile`
-      : pm === "yarn"
-      ? `RUN corepack enable && yarn install --production --no-frozen-lockfile`
-      : `RUN npm ci --omit=dev`;
+  const installLines = "RUN corepack enable && pnpm install --prod --no-frozen-lockfile";
 
   const sysDeps =
     systemPackages.length > 0
