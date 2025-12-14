@@ -1,6 +1,7 @@
 {
   "name": "example",
   "type": "module",
+  "private": "true",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

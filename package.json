@@ -9,13 +9,16 @@
     "create-nodejs-fn": "./dist/cli.mjs"
   },
   "scripts": {
+    "ci:publish": "pnpm run release:publish",
     "build": "tsup src/index.ts src/cli.ts --dts --format esm",
     "typecheck": "tsc --noEmit",
     "lint": "biome check",
     "lint:fix": "biome check --write",
     "changeset": "changeset",
-    "release": "changeset publish",
-    "prepare": "npm run build",
+    "release:version": "changeset version",
+    "release:publish": "pnpm run build && npm publish --provenance --access public",
+    "release": "pnpm run release:publish",
+    "prepublishOnly": "pnpm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -33,6 +36,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/inaridiy/create-nodejs-fn.git"
@@ -60,6 +66,7 @@
   "packageManager": "pnpm@10.12.3",
   "devDependencies": {
     "@biomejs/biome": "^2.3.8",
+    "@changesets/cli": "^2.29.8",
     "@types/node": "^25.0.1",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
